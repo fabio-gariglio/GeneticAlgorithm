@@ -12,12 +12,16 @@ namespace Dashboard
     public enum Direction
     {
         North,
+        NorthEast,
         East,
+        SouthEast,
         South,
+        SouthWest,
         West,
+        NorthWest
     }
 
-    public class Position
+    public class Position : IEquatable<Position>
     {
         public int X { get; }
         public int Y { get; }
@@ -27,11 +31,32 @@ namespace Dashboard
             X = x;
             Y = y;
         }
+
+        public bool Equals(Position other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Position) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
     }
 
     public class Creature
     {
         public Position Position { get; set; }
+        public int Fitness { get; set; }
 
         public Creature(Position position)
         {
@@ -42,30 +67,39 @@ namespace Dashboard
         {
             var targetDirection = GetTargetDirection(target.Position);
             Position = CalculateNewPosition(targetDirection);
+
+            var targetHit = target.Position.Equals(Position);
+            if (targetHit) Fitness++;
         }
 
-        public Direction GetTargetDirection(Position targetPosition)
+        private Direction GetTargetDirection(Position targetPosition)
         {
-            var angle = (Math.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X) * 180 / Math.PI)+180;
+            var angle = (Math.Atan2(targetPosition.Y - Position.Y, Position.X - targetPosition.X) * 180 / Math.PI)+180;
 
-            if (angle >= 45 && angle < 135) return Direction.North;
-            if (angle >= 135 && angle < 225) return Direction.East;
-            if (angle >= 225 && angle < 315) return Direction.South;
-            return Direction.West;
+            if (angle <= 22.5) return Direction.East;
+            if (angle <= 67.5) return Direction.NorthEast;
+            if (angle <= 112.5) return Direction.North;
+            if (angle <= 157.5) return Direction.NorthWest;
+            if (angle <= 202.5) return Direction.West;
+            if (angle <= 247.5) return Direction.SouthWest;
+            if (angle <= 292.5) return Direction.South;
+            if (angle <= 337.5) return Direction.SouthEast;
+            return Direction.East;
         }
 
         private Position CalculateNewPosition(Direction targetDirection)
         {
             switch (targetDirection)
             {
-                case Direction.East:
-                    return new Position(Position.X + 1, Position.Y);
-                case Direction.South:
-                    return new Position(Position.X, Position.Y + 1);
-                case Direction.West:
-                    return new Position(Position.X - 1, Position.Y);
-                default:
-                    return new Position(Position.X, Position.Y - 1);
+                case Direction.North: return new Position(Position.X, Position.Y - 1);
+                case Direction.NorthWest: return new Position(Position.X - 1, Position.Y - 1);
+                case Direction.West: return new Position(Position.X - 1, Position.Y);
+                case Direction.SouthWest: return new Position(Position.X - 1, Position.Y + 1);
+                case Direction.South: return new Position(Position.X, Position.Y + 1);
+                case Direction.SouthEast: return new Position(Position.X + 1, Position.Y + 1);
+                case Direction.East: return new Position(Position.X + 1, Position.Y);
+                case Direction.NorthEast: return new Position(Position.X + 1, Position.Y - 1);
+                default: throw new ArgumentOutOfRangeException(nameof(targetDirection));
             }
         }
     }

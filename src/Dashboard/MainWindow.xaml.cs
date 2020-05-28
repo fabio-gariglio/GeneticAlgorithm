@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -16,7 +17,7 @@ namespace Dashboard
         {
             InitializeComponent();
 
-            _target = new DrawableTarget(Canvas, new Position(30, 30));
+            _target = new DrawableTarget(Canvas, new Position(0, 0));
             _population = new Population<DrawableCreature>(10,
                 position => new DrawableCreature(Canvas, position)
             );
