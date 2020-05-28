@@ -8,6 +8,15 @@ using System.Windows.Shapes;
 
 namespace Dashboard
 {
+  
+    public enum Direction
+    {
+        North,
+        East,
+        South,
+        West,
+    }
+
     public class Position
     {
         public int X { get; }
@@ -22,21 +31,63 @@ namespace Dashboard
 
     public class Creature
     {
-        public Position Position { get; }
+        public Position Position { get; set; }
 
         public Creature(Position position)
         {
             Position = position;
         }
+
+        public void Move(Target target)
+        {
+            var targetDirection = GetTargetDirection(target.Position);
+            Position = CalculateNewPosition(targetDirection);
+        }
+
+        public Direction GetTargetDirection(Position targetPosition)
+        {
+            var angle = (Math.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X) * 180 / Math.PI)+180;
+
+            if (angle >= 45 && angle < 135) return Direction.North;
+            if (angle >= 135 && angle < 225) return Direction.East;
+            if (angle >= 225 && angle < 315) return Direction.South;
+            return Direction.West;
+        }
+
+        private Position CalculateNewPosition(Direction targetDirection)
+        {
+            switch (targetDirection)
+            {
+                case Direction.East:
+                    return new Position(Position.X + 1, Position.Y);
+                case Direction.South:
+                    return new Position(Position.X, Position.Y + 1);
+                case Direction.West:
+                    return new Position(Position.X - 1, Position.Y);
+                default:
+                    return new Position(Position.X, Position.Y - 1);
+            }
+        }
     }
 
     public class Target
     {
-        public Position Position { get; set; }
+        public Position Position { get; private set; }
+        private int angle = 0;
 
         public Target(Position position)
         {
             Position = position;
+        }
+
+        public void Move()
+        {
+            angle += 10;
+            if (angle > 360) angle = 0;
+
+            var x = 30 - (int)(Math.Cos(angle * Math.PI / 180) * 20);
+            var y = 30 - (int)(Math.Sin(angle * Math.PI / 180) * 20);
+            Position = new Position(x, y);
         }
     }
 
@@ -66,8 +117,6 @@ namespace Dashboard
     public class DrawableTarget : Target
     {
         private readonly Rectangle _appearance;
-        private readonly double Radiant = Math.PI / 180;
-        private int angle;
 
         public DrawableTarget(Canvas canvas, Position position) : base(position)
         {
@@ -83,13 +132,6 @@ namespace Dashboard
 
         public void Render()
         {
-            angle += 10;
-            if (angle > 360) angle = 0;
-
-            var x = 30 - (int) (Math.Cos(angle * Radiant) * 20);
-            var y = 30 - (int) (Math.Sin(angle * Radiant) * 20);
-            Position = new Position(x, y);
-
             Canvas.SetTop(_appearance, (Position.Y - 1) * 10);
             Canvas.SetLeft(_appearance, (Position.X - 1) * 10);
         }
