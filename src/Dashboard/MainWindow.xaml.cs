@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Timers;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace Dashboard
 {
@@ -19,6 +22,15 @@ namespace Dashboard
                 position => new DrawableCreature(Canvas, position)
             );
 
+            var timer = new DispatcherTimer();
+
+            timer.Tick += ActAndRender;
+            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Start();
+        }
+
+        private void ActAndRender(object sender, EventArgs e)
+        {
             _target.Render();
             _population.ForEach(creature => creature.Render());
         }

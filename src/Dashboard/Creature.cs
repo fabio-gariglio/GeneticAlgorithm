@@ -32,7 +32,7 @@ namespace Dashboard
 
     public class Target
     {
-        public Position Position { get; }
+        public Position Position { get; set; }
 
         public Target(Position position)
         {
@@ -66,6 +66,8 @@ namespace Dashboard
     public class DrawableTarget : Target
     {
         private readonly Rectangle _appearance;
+        private readonly double Radiant = Math.PI / 180;
+        private int angle;
 
         public DrawableTarget(Canvas canvas, Position position) : base(position)
         {
@@ -81,6 +83,13 @@ namespace Dashboard
 
         public void Render()
         {
+            angle += 10;
+            if (angle > 360) angle = 0;
+
+            var x = 30 - (int) (Math.Cos(angle * Radiant) * 20);
+            var y = 30 - (int) (Math.Sin(angle * Radiant) * 20);
+            Position = new Position(x, y);
+
             Canvas.SetTop(_appearance, (Position.Y - 1) * 10);
             Canvas.SetLeft(_appearance, (Position.X - 1) * 10);
         }
