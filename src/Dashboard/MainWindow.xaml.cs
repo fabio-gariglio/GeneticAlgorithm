@@ -1,18 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace Dashboard
 {
@@ -21,9 +7,20 @@ namespace Dashboard
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly Population<DrawableCreature> _population;
+        private readonly DrawableTarget _target;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            _target = new DrawableTarget(Canvas, new Position(30, 30));
+            _population = new Population<DrawableCreature>(10,
+                position => new DrawableCreature(Canvas, position)
+            );
+
+            _target.Render();
+            _population.ForEach(creature => creature.Render());
         }
     }
 }
